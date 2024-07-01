@@ -1,0 +1,18 @@
+[package]
+authors = ["Noel Matero <noelbenjaminmatero@gmail.com>"]
+name = "rflask_macro"
+version = "0.1.0"
+edition = "2021"
+description = "Flask-like super simple and lightweight web server framework for rust"
+license = "MIT"
+keywords = ["rflask", "flask", "server", "web server", "http"]
+
+[dependencies]
+syn = { version = "2.0.65", features = ["full"] }
+quote = "1.0"
+lib_shared = { path = "./lib_shared" }
+ctor = "0.2.8"
+
+[lib]
+proc-macro = true
+
