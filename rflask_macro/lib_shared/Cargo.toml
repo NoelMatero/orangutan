@@ -6,6 +6,7 @@ edition = "2021"
 description = "Flask-like super simple and lightweight web server framework for rust"
 license = "MIT"
 keywords = ["rflask", "flask", "server", "web server", "http"]
+repository = "https://github.com/NoelMatero/rFlask/"
 
 [dependencies]
 chrono = "0.4.38"

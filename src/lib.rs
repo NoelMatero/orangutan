@@ -6,7 +6,7 @@ use lib_shared::{RouteInfo,utils, ROUTES};
 use lib_shared::response::Response;
 use lib_shared::request::{match_method, Method, Request};
 
-
+use route::{Route, RouteDef};
 use threadpool::ThreadPool;
 use mio::util::Slab;
 use mio::tcp::{TcpStream, TcpListener};
@@ -96,18 +96,18 @@ impl Client {
 
     /// Registers the client with the event loop to listen for events.
     /// Adds the `readable` event to the client's event set.
-    fn register(&mut self, evl: &mut EventLoop<Comm>) -> Result<(), std::io::Error> {
+    fn register(&mut self, evl: &mut EventLoop<App>) -> Result<(), std::io::Error> {
         self.events.insert(EventSet::readable());
         evl.register(&self.sock, self.token, self.events, PollOpt::edge() | PollOpt::oneshot())
     }
 
     /// Re-registers the client with the event loop to continue listening for events.
-    fn reregister(&mut self, evl: &mut EventLoop<Comm>) -> Result<(), std::io::Error> {
+    fn reregister(&mut self, evl: &mut EventLoop<App>) -> Result<(), std::io::Error> {
         evl.reregister(&self.sock, self.token, self.events, PollOpt::edge() | PollOpt::oneshot())
     }
 }
 
-pub struct Comm {
+pub struct App {
     routes:  HashMap<route::RouteDef, route::Route>,
     rcache:  HashMap<route::RouteDef, route::RouteDef>,
     server:  Option<TcpListener>,
@@ -117,13 +117,13 @@ pub struct Comm {
     tpool:   ThreadPool,
 }
 
-impl Handler for Comm {
+impl Handler for App {
     type Timeout = ();
     type Message = (Token, Vec<u8>);    
 
     /// Handles events for the event loop.
     /// Determines if the event is for the server socket (new connection) or an existing client (read/write).
-    fn ready(&mut self, evl: &mut EventLoop<Comm>, token: Token, events: EventSet) {
+    fn ready(&mut self, evl: &mut EventLoop<App>, token: Token, events: EventSet) {
         if events.is_error() || events.is_hup() {
             self.reset_connection(token);
             return;
@@ -158,7 +158,7 @@ impl Handler for Comm {
         }
     }
 
-    fn notify(&mut self, evl: &mut EventLoop<Comm>, msg: (Token, Vec<u8>)) {
+    fn notify(&mut self, evl: &mut EventLoop<App>, msg: (Token, Vec<u8>)) {
         let (token, output) = msg;
         let client = self.get_client(token);
 
@@ -167,12 +167,12 @@ impl Handler for Comm {
     }
 }
 
-impl Comm {
+impl App {
     pub fn new<A: ToSocketAddrs>(address: A) -> Self {  
 
         let server = Some(TcpListener::bind(&address.to_socket_addrs().unwrap().next().unwrap()).unwrap());           
 
-        Comm {
+        App {
             routes:  HashMap::new(), 
             rcache:  HashMap::new(), 
             server,
@@ -198,7 +198,7 @@ impl Comm {
         ))
     }
 
-    fn readable(&mut self, evl: &mut EventLoop<Comm>, token: Token) -> Result<bool, std::io::Error> {
+    fn readable(&mut self, evl: &mut EventLoop<App>, token: Token) -> Result<bool, std::io::Error> {
         if let Ok(true) = self.get_client(token).receive() {
             let buf = self.get_client(token).i_buf.clone();
             if let Ok(rqstr) = String::from_utf8(buf) {
@@ -211,7 +211,7 @@ impl Comm {
         Ok(true)
     }
 
-    fn reregister(&mut self, evl: &mut EventLoop<Comm>) {
+    fn reregister(&mut self, evl: &mut EventLoop<App>) {
         if let Some(ref server) = self.server {
             evl.reregister(server, self.token,
                                  EventSet::readable(),
@@ -249,7 +249,7 @@ impl Comm {
     
                 if self.routes.contains_key(&routedef) {
                     panic!("Route handler for {} has already been defined!", path); 
-                }
+                }                
     
                 self.routes.insert(routedef, route::Route::new(&path, *m, handler));
             }
@@ -262,15 +262,27 @@ impl Comm {
 
         match self.server {
             None    => println!("server not bound to an address!"),
-            Some(_) => {
-                println!("Server being run on {:?}", self.server.as_mut().unwrap().local_addr().unwrap());       
+            Some(_) => {                                                
+                let mut route_paths: Vec<String> = Vec::new();
+
+                for a in &self.routes {                      
+                    route_paths.push(a.0.path.clone());                                        
+                }                
+
+                route_paths.dedup();
+
+                for route_path in route_paths.clone() {  
+                    println!("  * rFlask being served!");                                      
+                    println!("    *  rFlask running on http://{:?}{} (Press CTRL+C to quit)", self.server.as_mut().unwrap().local_addr().unwrap(), route_path);       
+                }                    
+
                 self.register(&mut evl).ok();                
                 evl.run(self).unwrap();                         
             },
         };                 
     }
 
-    fn register(&mut self, evl: &mut EventLoop<Comm>) -> Result<(), std::io::Error> {
+    fn register(&mut self, evl: &mut EventLoop<App>) -> Result<(), std::io::Error> {
         if let Some(ref server) = self.server {            
             return evl.register(server, self.token, EventSet::readable(), PollOpt::edge() | PollOpt::oneshot());
         }
