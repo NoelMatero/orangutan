@@ -1,19 +1,19 @@
 [package]
 authors = ["Noel Matero <noelbenjaminmatero@gmail.com>"]
-name = "rflask"
+name = "orangutan"
 version = "0.1.0"
 edition = "2021"
 description = "Flask-like super simple and lightweight web server framework for rust"
 license = "MIT"
-keywords = ["rflask", "flask", "server", "web server", "http"]
+keywords = ["orangutan", "flask", "server", "web server", "http"]
 repository = "https://github.com/NoelMatero/rFlask/"
 
 [dependencies]
 mio = "0.5"
 regex = "1.10.4"
 threadpool = "1.8.1"
-rflask_macro = { path = "./rflask_macro" }
-lib_shared = { path = "./rflask_macro/lib_shared" }
+orangutan_macro = { path = "./orangutan_macro" }
+lib_shared = { path = "./orangutan_macro/lib_shared" }
 lazy_static = "1.4"
 serde_json = "1.0.117"
 ctor = "0.2.8"

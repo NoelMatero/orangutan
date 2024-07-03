@@ -272,6 +272,30 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3fdb12b2476b595f9358c5161aa467c2438859caa136dec86c26fdd2efe17b92"
 
 [[package]]
+name = "orangutan"
+version = "0.1.0"
+dependencies = [
+ "ctor",
+ "lazy_static",
+ "lib_shared",
+ "mio",
+ "orangutan_macro",
+ "regex",
+ "serde_json",
+ "threadpool",
+]
+
+[[package]]
+name = "orangutan_macro"
+version = "0.1.0"
+dependencies = [
+ "ctor",
+ "lib_shared",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "proc-macro2"
 version = "1.0.83"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -317,30 +341,6 @@ name = "regex-syntax"
 version = "0.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "adad44e29e4c806119491a7f06f03de4d1af22c3a680dd47f1e6e179439d1f56"
-
-[[package]]
-name = "rflask"
-version = "0.1.0"
-dependencies = [
- "ctor",
- "lazy_static",
- "lib_shared",
- "mio",
- "regex",
- "rflask_macro",
- "serde_json",
- "threadpool",
-]
-
-[[package]]
-name = "rflask_macro"
-version = "0.1.0"
-dependencies = [
- "ctor",
- "lib_shared",
- "quote",
- "syn",
-]
 
 [[package]]
 name = "ryu"

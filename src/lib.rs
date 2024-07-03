@@ -6,7 +6,6 @@ use lib_shared::{RouteInfo,utils, ROUTES};
 use lib_shared::response::Response;
 use lib_shared::request::{match_method, Method, Request};
 
-use route::{Route, RouteDef};
 use threadpool::ThreadPool;
 use mio::util::Slab;
 use mio::tcp::{TcpStream, TcpListener};
@@ -96,18 +95,18 @@ impl Client {
 
     /// Registers the client with the event loop to listen for events.
     /// Adds the `readable` event to the client's event set.
-    fn register(&mut self, evl: &mut EventLoop<App>) -> Result<(), std::io::Error> {
+    fn register(&mut self, evl: &mut EventLoop<Orangutan>) -> Result<(), std::io::Error> {
         self.events.insert(EventSet::readable());
         evl.register(&self.sock, self.token, self.events, PollOpt::edge() | PollOpt::oneshot())
     }
 
     /// Re-registers the client with the event loop to continue listening for events.
-    fn reregister(&mut self, evl: &mut EventLoop<App>) -> Result<(), std::io::Error> {
+    fn reregister(&mut self, evl: &mut EventLoop<Orangutan>) -> Result<(), std::io::Error> {
         evl.reregister(&self.sock, self.token, self.events, PollOpt::edge() | PollOpt::oneshot())
     }
 }
 
-pub struct App {
+pub struct Orangutan {
     routes:  HashMap<route::RouteDef, route::Route>,
     rcache:  HashMap<route::RouteDef, route::RouteDef>,
     server:  Option<TcpListener>,
@@ -117,13 +116,13 @@ pub struct App {
     tpool:   ThreadPool,
 }
 
-impl Handler for App {
+impl Handler for Orangutan {
     type Timeout = ();
     type Message = (Token, Vec<u8>);    
 
     /// Handles events for the event loop.
     /// Determines if the event is for the server socket (new connection) or an existing client (read/write).
-    fn ready(&mut self, evl: &mut EventLoop<App>, token: Token, events: EventSet) {
+    fn ready(&mut self, evl: &mut EventLoop<Orangutan>, token: Token, events: EventSet) {
         if events.is_error() || events.is_hup() {
             self.reset_connection(token);
             return;
@@ -158,7 +157,7 @@ impl Handler for App {
         }
     }
 
-    fn notify(&mut self, evl: &mut EventLoop<App>, msg: (Token, Vec<u8>)) {
+    fn notify(&mut self, evl: &mut EventLoop<Orangutan>, msg: (Token, Vec<u8>)) {
         let (token, output) = msg;
         let client = self.get_client(token);
 
@@ -167,12 +166,12 @@ impl Handler for App {
     }
 }
 
-impl App {
+impl Orangutan {
     pub fn new<A: ToSocketAddrs>(address: A) -> Self {  
 
         let server = Some(TcpListener::bind(&address.to_socket_addrs().unwrap().next().unwrap()).unwrap());           
 
-        App {
+        Orangutan {
             routes:  HashMap::new(), 
             rcache:  HashMap::new(), 
             server,
@@ -198,7 +197,7 @@ impl App {
         ))
     }
 
-    fn readable(&mut self, evl: &mut EventLoop<App>, token: Token) -> Result<bool, std::io::Error> {
+    fn readable(&mut self, evl: &mut EventLoop<Orangutan>, token: Token) -> Result<bool, std::io::Error> {
         if let Ok(true) = self.get_client(token).receive() {
             let buf = self.get_client(token).i_buf.clone();
             if let Ok(rqstr) = String::from_utf8(buf) {
@@ -211,7 +210,7 @@ impl App {
         Ok(true)
     }
 
-    fn reregister(&mut self, evl: &mut EventLoop<App>) {
+    fn reregister(&mut self, evl: &mut EventLoop<Orangutan>) {
         if let Some(ref server) = self.server {
             evl.reregister(server, self.token,
                                  EventSet::readable(),
@@ -230,15 +229,16 @@ impl App {
 
         let _b = handler; // gets rid of the warning
 
-        let mut methods: HashSet<Method> = HashSet::new();
+        let mut methods: HashSet<Method> = HashSet::new();        
 
-        for route in routes.iter() {            
+        for route in routes.iter() {                      
+
             path = route.path.clone(); 
 
             handler = route.handler; 
 
-            for method in route.methods.iter() {
-                methods.insert(match_method(method));
+            for method in route.methods.clone() {
+                methods.insert(match_method(&method));
             }
 
             for m in &methods {                
@@ -269,11 +269,13 @@ impl App {
                     route_paths.push(a.0.path.clone());                                        
                 }                
 
-                route_paths.dedup();
+                route_paths.sort_unstable();
+                route_paths.dedup(); 
 
-                for route_path in route_paths.clone() {  
-                    println!("  * rFlask being served!");                                      
-                    println!("    *  rFlask running on http://{:?}{} (Press CTRL+C to quit)", self.server.as_mut().unwrap().local_addr().unwrap(), route_path);       
+                println!("  * orangutan being served!");    
+
+                for route_path in route_paths.clone() {                                                        
+                    println!("    *  orangutan running on http://{:?}{} (Press CTRL+C to quit)", self.server.as_mut().unwrap().local_addr().unwrap(), route_path);       
                 }                    
 
                 self.register(&mut evl).ok();                
@@ -282,7 +284,7 @@ impl App {
         };                 
     }
 
-    fn register(&mut self, evl: &mut EventLoop<App>) -> Result<(), std::io::Error> {
+    fn register(&mut self, evl: &mut EventLoop<Orangutan>) -> Result<(), std::io::Error> {
         if let Some(ref server) = self.server {            
             return evl.register(server, self.token, EventSet::readable(), PollOpt::edge() | PollOpt::oneshot());
         }
