@@ -4,7 +4,7 @@ orangutan is a lightweight and SUPER simple rust web server library inspired by 
 
 ## Installation (cargo)
 
-Use cargo to add orangutan to your project as an dependencie
+Use cargo to add orangutan to your project as a dependencie
 
 ```bash
 cargo add orangutan
