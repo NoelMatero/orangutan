@@ -6,7 +6,7 @@ edition = "2021"
 description = "Flask-like super simple and lightweight web server framework for rust"
 license = "MIT"
 keywords = ["orangutan", "flask", "server", "web server", "http"]
-repository = "https://github.com/NoelMatero/rFlask/"
+repository = "https://github.com/NoelMatero/orangutan"
 
 [dependencies]
 chrono = "0.4.38"
