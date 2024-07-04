@@ -4,10 +4,15 @@ orangutan is a lightweight and SUPER simple rust web server library inspired by 
 
 ## Installation (cargo)
 
-Use cargo to add orangutan to your project as a dependencie
+Unfortunately you must add more than one crate to use orangutan because of the macro. This will be fixed in the future but for now I am sorry for the inconvenience.
+
+In the Cargo.toml add:
 
 ```bash
-cargo add orangutan
+[dependencies]
+orangutan = "0.1.0"
+lib_shared = "0.1.0"
+ctor = "0.2.8"
 ```
 
 ## Usage
@@ -15,6 +20,8 @@ cargo add orangutan
 This is what a minimal orangutan application looks like:
 
 ```rust
+use orangutan::*;
+
 // Use the 'route'-macro to define the path, method(s) and a handler
 #[route(path="/hello", method="[POST, GET]")] 
 fn hello_handler(request: &Request) -> Response {
@@ -57,6 +64,8 @@ orangutan is quite a powerful and useful tool. Here are some of the things that 
 ## Variables in path
 
 ```rust
+use orangutan::*;
+
 // Same as defining a normal route but with the path containing the type and variable name.
 #[route(path="/<str:username>", method="[GET, POST]")]
 fn username_handler(request: &Request) -> Response {
@@ -102,6 +111,8 @@ fn main() {
 In this example I will show you how to handle Requests that contain Json data
 
 ```rust
+use orangutan::*;
+
 #[route(path="/order", method="[GET, POST]")]
 fn order_handler(request: &Request) -> Response {
 
