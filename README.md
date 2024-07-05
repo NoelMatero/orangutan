@@ -31,7 +31,7 @@ fn hello_handler(request: &Request) -> Response {
     let mut res = Response::new();
 
     // Use the 'insert'-method to insert text/JSON into the Response     
-    res.insert("Hello!");re
+    res.insert("Hello!");
 
     res
 
