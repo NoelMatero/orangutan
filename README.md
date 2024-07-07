@@ -22,6 +22,7 @@ This is what a minimal orangutan application looks like:
 
 ```rust
 use orangutan::*;
+use lib_shared::*;
 
 // Use the 'route'-macro to define the path, method(s) and a handler
 #[route(path="/hello", method="[POST, GET]")]
@@ -66,6 +67,7 @@ orangutan is quite a powerful and useful tool. Here are some of the things that 
 
 ```rust
 use orangutan::*;
+use lib_shared::*;
 
 // Same as defining a normal route but with the path containing the type and variable name.
 #[route(path="/<str:username>", method="[GET, POST]")]
@@ -114,6 +116,7 @@ In this example, I will show you how to handle Requests that contain JSON data
 
 ```rust
 use orangutan::*;
+use lib_shared::*;
 
 #[route(path="/order", method="[GET, POST]")]
 fn order_handler(request: &Request) -> Response {
