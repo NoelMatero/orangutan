@@ -2,6 +2,7 @@
 
 orangutan is a lightweight and SUPER simple rust web server library inspired by Python's [Flask](https://flask.palletsprojects.com/en/3.0.x/).
 
+
 ## Installation (cargo)
 
 Unfortunately, you must add more than one crate to use orangutan because of the macro. This will be fixed in the future but for now I am sorry for the inconvenience.
@@ -190,7 +191,7 @@ fn user_status_handler(request: &Request) -> Response {
             let user_status: Option<&Value> = data.get("user_status");
 
             if user_status.unwrap() != "VIP" {
-                // Use the abort method to create an error for Response. Only 403, 404 and 500 are valid errors for now.
+                // Use the abort method to create an error for Response. Only 403, 404, and 500 are valid errors for now.
                 res.abort(request, 403);
             } else {
                 res.insert("Welcome to the club!");
@@ -233,6 +234,4 @@ fn handler(request: &Request) -> Response {
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
 ## License
-
-[MIT](https://choosealicense.com/licenses/mit/)
-```
+ [![License: MIT](https://img.shields.io/badge/MIT-gray.svg)](https://choosealicense.com/licenses/mit/)
