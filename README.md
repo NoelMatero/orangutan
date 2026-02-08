@@ -55,8 +55,6 @@ Output of the program:
     *  orangutan running on http://127.0.0.1:8080/hello (Press CTRL+C to quit)
 ```
 
-I recommend using software like [ngrok](https://ngrok.com/) to make the web server public, as there is no way of doing it with orangutan.
-
 # Examples
 
 orangutan is quite a powerful and useful tool. Here are some of the things that orangutan can do!
