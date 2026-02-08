@@ -5,8 +5,6 @@ orangutan is a lightweight and SUPER simple rust web server library inspired by 
 
 ## Installation (cargo)
 
-Unfortunately, you must add more than one crate to use orangutan because of the macro. This will be fixed in the future but for now I am sorry for the inconvenience.
-
 In the Cargo.toml add:
 
 ```bash
